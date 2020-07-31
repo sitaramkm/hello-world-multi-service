@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: blue
+spec:
+  selector:
+    matchLabels:
+      app: blue
+  template:
+    metadata:
+      labels:
+        app: blue
+    spec:
+      containers:
+      - name: blue
+        image: sitaramiyer/blue
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 80
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 80
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 50m
+            memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: blue
+spec:
+  type: ClusterIP
+  selector:
+    app: blue
+  ports:
+  - name: blue
+    port: 80
+    targetPort: 80
+

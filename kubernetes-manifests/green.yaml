@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green
+spec:
+  selector:
+    matchLabels:
+      app: green
+  template:
+    metadata:
+      labels:
+        app: green
+    spec:
+      containers:
+      - name: green
+        image: sitaramiyer/green
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 80
+        livenessProbe:
+          periodSeconds: 5
+          tcpSocket:
+            port: 80
+        resources:
+          limits:
+            memory: 256Mi
+            cpu: 125m
+          requests:
+            cpu: 50m
+            memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: green
+spec:
+  type: ClusterIP
+  selector:
+    app: green
+  ports:
+  - name: green
+    port: 80
+    targetPort: 80
+

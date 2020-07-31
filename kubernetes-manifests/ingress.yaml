@@ -1,0 +1,36 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$1
+  name: bg-ingress
+spec:
+#  tls:
+#  - hosts:
+#    - blue.<replace-with-your-domain>
+#    secretName: blue.<replace-with-your-domain>
+#  - hosts:
+#    - green.<replace-with-your-domain>
+#    secretName: green.<replace-with-your-domain>
+#  - hosts:
+#    - svc.<replace-with-your-domain>
+#    secretName: svc.<replace-with-your-domain>
+
+  rules:
+  - host: svc.<replace-with-your-domain>
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: green
+          servicePort: 80
+      - path: /blue
+        backend:
+          serviceName: blue
+          servicePort: 80
+      - path: /green
+        backend:
+          serviceName: green
+          servicePort: 80
+
+ 

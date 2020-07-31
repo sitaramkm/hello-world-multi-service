@@ -1,0 +1,73 @@
+# Copyright 2018 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: skaffold/v2beta1
+kind: Config
+metadata:
+  name: blue-green-deployment-example
+build:
+  artifacts:
+  # image tags are relative; to specify an image repo (e.g. GCR), you
+  # must provide a "default repo" using one of the methods described
+  # here:
+  # https://skaffold.dev/docs/concepts/#image-repository-handling
+  #Every app is built individually as part of skaffold.
+  #xxxxxxx06.dkr.ecr.us-east-2.amazonaws.com
+  - image: sitaramiyer/blue
+    context: src/blue
+  - image: sitaramiyer/green
+    context: src/green
+  tagPolicy:
+    envTemplate:
+      template: "{{.IMAGE_NAME}}:{{.APP_VERSION}}"
+    #gitCommit: {}
+deploy:
+  kubectl:
+    manifests:
+    - ./kubernetes-manifests/**.yaml
+profiles:
+# "gcb" profile allows building and pushing the images
+# on Google Container Builder without requiring docker
+# installed on the developer machine. However, note that
+# since GCB does not cache the builds, each build will
+# start from scratch and therefore take a long time.
+#
+# This is not used by default. To use it, run:
+#     skaffold run -p gcb
+- name: gcb
+  build:
+    googleCloudBuild:
+      diskSizeGb: 300
+      machineType: N1_HIGHCPU_32
+      timeout: 4000s
+# "local" profile builds images locally on Docker
+# works with minikube or Kind. Install Docker for Desktop or just start minikube.
+# To use it, run skaffold build -p local
+- name: local
+  build:
+    local:
+     useDockerCLI: true
+     #concurrency: 0
+# "docker" profile builds and pushes images to docker hub
+#  create the required k8s secrets before using this profile
+#  kubectl create secret generic skaffold-cfg  --from-file=$HOME/.docker/config.json
+#  kubectl create secret docker-registry regcred --docker-server=registry.docker.io --docker-username=<dockerUserID> --docker-password=<dockerPassword> --docker-email=<dockerEmailID>
+- name: docker
+  build:
+    cluster:
+      pullSecretName: regcred
+      namespace: default
+      dockerConfig:
+        secretName: skaffold-cfg
+     #  path: ~/.docker/config.json
