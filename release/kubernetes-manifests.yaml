@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: green
-        image: sitaramiyer/green:v0.5
+        image: sitaramiyer/green:v0.6
         ports:
         - containerPort: 80
         readinessProbe:
@@ -103,7 +103,7 @@ spec:
     spec:
       containers:
       - name: blue
-        image: sitaramiyer/blue:v0.5
+        image: sitaramiyer/blue:v0.6
         ports:
         - containerPort: 80
         readinessProbe:
